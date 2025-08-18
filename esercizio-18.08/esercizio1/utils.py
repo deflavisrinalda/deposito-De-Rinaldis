@@ -11,9 +11,15 @@ def open_file(file_path: str) -> str:
 def read_lines(file_path: str) -> int:
 
     opened_file = open_file(file_path)
-    print(opened_file)
     lines = opened_file.splitlines()
-    print(lines)
     return len(lines)
     
 print(read_lines("prova.txt"))
+
+def total_words(file_path: str) -> int:
+    
+    opened_file = open_file(file_path)
+    words = opened_file.split()
+    return len(words)
+
+print(total_words("prova.txt"))
