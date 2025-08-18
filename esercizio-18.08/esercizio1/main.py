@@ -1,13 +1,16 @@
-
+from utils import *
 
 def main():
 
     #numero totale righe
+    print(read_lines("prova.txt"))
 
     #numero totale parole
-
+    print(total_words("prova.txt"))
+    
     #top5 parole più frequenti
-    print("ciao")
+    print(top_five("prova.txt"))
+
 
 if __name__ == "__main__":
     main()

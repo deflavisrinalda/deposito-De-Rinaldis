@@ -14,7 +14,7 @@ def read_lines(file_path: str) -> int:
     lines = opened_file.splitlines()
     return len(lines)
     
-print(read_lines("prova.txt"))
+
 
 def total_words(file_path: str) -> int:
     
@@ -22,7 +22,7 @@ def total_words(file_path: str) -> int:
     words = opened_file.split()
     return len(words)
 
-print(total_words("prova.txt"))
+
 
 def top_five(file_path: str) -> list:
     
@@ -42,4 +42,3 @@ def top_five(file_path: str) -> list:
     
     return top_five_words
 
-print(top_five("prova.txt"))
