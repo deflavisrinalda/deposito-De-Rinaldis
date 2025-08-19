@@ -25,3 +25,11 @@ df["classificazione_giornaliera"] = df[colonna_consumo].apply(lambda x: "sotto m
 #check creazione classificazione giornaliera
 print(df.head())
 print(df.tail())
+
+#classificazione rispetto alla media settimanale
+media_settimanale = df.groupby(df.index.isocalendar().week)[colonna_consumo].mean().mean()
+df["classificazione_settimanale"] = df[colonna_consumo].apply(lambda x: "sotto media" if x < media_settimanale else "sopra media")
+
+#check creazione classificazione settimanale
+print(df.head())
+print(df.tail())
