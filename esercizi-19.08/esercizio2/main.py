@@ -15,7 +15,6 @@ df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
 
 print(df.head())
 print(df.tail())
-print(df.shape[0])
 
 #creo la colonna datetime
 df["datetime"] = pd.to_datetime(df["Date"] + " " + df["Time"], format= "%d/%m/%Y %H.%M.%S", errors='coerce' )
@@ -25,9 +24,8 @@ df.set_index("datetime", inplace=True)
 #check
 print(df.head())
 print(df.tail())
-print(df.shape[0])
 
-#feature engineering
+#feature temporali
 df["hour"] = df.index.hour
 df["dayofweek"] = df.index.dayofweek
 df["month"] = df.index.month

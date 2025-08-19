@@ -1,40 +1,23 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
 
+df = pd.read_csv('../esercizi-19.08/esercizio1/DUQ_hourly.csv', parse_dates=['Datetime'])
 
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.datasets import make_classification
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-import xgboost as xgb
+print(df.columns)
 
-# Generazione dati sintetici per visualizzazione
-X, y = make_classification(n_samples=500, n_features=2, n_informative=2,
-                        n_redundant=0, n_clusters_per_class=1, class_sep=1.5, random_state=42)
+# Etichetta: 1 se consumo > mediana, altrimenti 0
+df["target"] = (df["DUQ_MW"] > df["DUQ_MW"].median()).astype(int)
 
-# Griglia per il plot
-x_min, x_max = X[:, 0].min() - .5, X[:, 0].max() + .5
-y_min, y_max = X[:, 1].min() - .5, X[:, 1].max() + .5
-xx, yy = np.meshgrid(np.linspace(x_min, x_max, 300),
-                    np.linspace(y_min, y_max, 300))
+df["hour"] = df["Datetime"].dt.hour
+df["dayofweek"] = df["Datetime"].dt.dayofweek
+df["month"] = df["Datetime"].dt.month
 
-# Addestramento modelli
-models = {
-    "Logistic Regression": LogisticRegression(),
-    "Random Forest": RandomForestClassifier(n_estimators=50, max_depth=5, random_state=42),
-    "XGBoost": xgb.XGBClassifier( eval_metric="logloss")
-}
+# Feature: ora, giorno della settimana, mese
+X = df[["hour", "dayofweek", "month"]]
+y = df["target"]
 
-# Creazione grafici
-plt.figure(figsize=(18, 5))
-for idx, (name, model) in enumerate(models.items(), 1):
-    model.fit(X, y)
-    Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
-    Z = Z.reshape(xx.shape)
+# Split
+X_temp, X_test, y_temp, y_test = train_test_split(X, y, test_size=0.15, stratify=y, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(X_temp, y_temp, test_size=0.176, stratify=y_temp, random_state=42)
 
-    plt.subplot(1, 3, idx)
-    plt.contourf(xx, yy, Z, alpha=0.3, cmap=plt.cm.RdBu)
-    plt.scatter(X[:, 0], X[:, 1], c=y, cmap=plt.cm.RdBu, edgecolors='k')
-    plt.title(name)
-
-plt.suptitle("Confronto della frontiera decisionale tra i modelli")
-plt.show()
+print(f"Train: {X_train.shape}, Validation: {X_val.shape}, Test: {X_test.shape}")
