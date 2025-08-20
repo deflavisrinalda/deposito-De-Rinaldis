@@ -23,31 +23,48 @@ df["month"] = df["Datetime"].dt.month
 # print(f"Train: {X_train.shape}, Validation: {X_val.shape}, Test: {X_test.shape}")
 
 
-from sklearn.model_selection import StratifiedKFold, cross_val_score
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.neural_network import MLPClassifier
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
-from sklearn.metrics import roc_auc_score, make_scorer
+# from sklearn.model_selection import StratifiedKFold, cross_val_score
+# from sklearn.tree import DecisionTreeClassifier
+# from sklearn.neural_network import MLPClassifier
+# from sklearn.preprocessing import StandardScaler
+# from sklearn.pipeline import Pipeline
+# from sklearn.metrics import roc_auc_score, make_scorer
 
-# Feature e target (come prima)
-X = df[["hour", "dayofweek", "month"]]
-y = df["target"]
+# # Feature e target (come prima)
+# X = df[["hour", "dayofweek", "month"]]
+# y = df["target"]
 
-# K-Fold stratificato
-skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+# # K-Fold stratificato
+# skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
-# Decision Tree
-tree = DecisionTreeClassifier(max_depth=5, random_state=42)
-auc_tree = cross_val_score(tree, X, y, cv=skf, scoring="roc_auc")
+# # Decision Tree
+# tree = DecisionTreeClassifier(max_depth=5, random_state=42)
+# auc_tree = cross_val_score(tree, X, y, cv=skf, scoring="roc_auc")
 
-# Neural Network con scaling
-mlp_pipeline = Pipeline([
-    ("scaler", StandardScaler()),
-    ("mlp", MLPClassifier(hidden_layer_sizes=(64, 32), max_iter=300, random_state=42))
-])
-auc_mlp = cross_val_score(mlp_pipeline, X, y, cv=skf, scoring="roc_auc")
+# # Neural Network con scaling
+# mlp_pipeline = Pipeline([
+#     ("scaler", StandardScaler()),
+#     ("mlp", MLPClassifier(hidden_layer_sizes=(64, 32), max_iter=300, random_state=42))
+# ])
+# auc_mlp = cross_val_score(mlp_pipeline, X, y, cv=skf, scoring="roc_auc")
 
-print(f"Decision Tree AUC: {auc_tree.mean():.3f} ± {auc_tree.std():.3f}")
-print(f"Neural Network AUC: {auc_mlp.mean():.3f} ± {auc_mlp.std():.3f}")
+# print(f"Decision Tree AUC: {auc_tree.mean():.3f} ± {auc_tree.std():.3f}")
+# print(f"Neural Network AUC: {auc_mlp.mean():.3f} ± {auc_mlp.std():.3f}")
 
+from sklearn.cluster import KMeans
+
+# Applichiamo k-Means ai dati generati
+kmeans = KMeans(n_clusters=3, random_state=0)
+labels = kmeans.fit_predict(data)
+
+# Visualizzazione con i cluster trovati
+plt.figure(figsize=(6, 6))
+plt.scatter(data[:, 0], data[:, 1], c=labels, cmap='viridis')
+plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], 
+            c='red', marker='X', s=200, label='Centroidi')
+plt.title("Cluster trovati con k-Means")
+plt.xlabel("Spesa totale")
+plt.ylabel("Numero ordini")
+plt.legend()
+plt.grid(True)
+plt.show()
