@@ -51,40 +51,79 @@
 # print(f"Decision Tree AUC: {auc_tree.mean():.3f} ± {auc_tree.std():.3f}")
 # print(f"Neural Network AUC: {auc_mlp.mean():.3f} ± {auc_mlp.std():.3f}")
 
+# import matplotlib.pyplot as plt
+# import numpy as np
+
+# # Generiamo 3 gruppi di punti (cluster)
+# np.random.seed(42)
+# group1 = np.random.normal(loc=[2, 2], scale=0.5, size=(50, 2))
+# group2 = np.random.normal(loc=[6, 6], scale=0.5, size=(50, 2))
+# group3 = np.random.normal(loc=[2, 6], scale=0.5, size=(50, 2))
+
+# data = np.vstack((group1, group2, group3))
+
+# # Visualizziamo i punti (senza clustering)
+# plt.figure(figsize=(6, 6))
+# plt.scatter(data[:, 0], data[:, 1], c='gray')
+# plt.title("Clienti (senza etichette)")
+# plt.xlabel("Spesa totale")
+# plt.ylabel("Numero ordini")
+# plt.grid(True)
+# plt.show()
+
+# from sklearn.cluster import KMeans
+
+# # Applichiamo k-Means ai dati generati
+# kmeans = KMeans(n_clusters=3, random_state=0)
+# labels = kmeans.fit_predict(data)
+
+# # Visualizzazione con i cluster trovati
+# plt.figure(figsize=(6, 6))
+# plt.scatter(data[:, 0], data[:, 1], c=labels, cmap='viridis')
+# plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], 
+#             c='red', marker='X', s=200, label='Centroidi')
+# plt.title("Cluster trovati con k-Means")
+# plt.xlabel("Spesa totale")
+# plt.ylabel("Numero ordini")
+# plt.legend()
+# plt.grid(True)
+# plt.show()
+
 import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score, silhouette_samples
 import numpy as np
 
-# Generiamo 3 gruppi di punti (cluster)
-np.random.seed(42)
-group1 = np.random.normal(loc=[2, 2], scale=0.5, size=(50, 2))
-group2 = np.random.normal(loc=[6, 6], scale=0.5, size=(50, 2))
-group3 = np.random.normal(loc=[2, 6], scale=0.5, size=(50, 2))
+# Generiamo dati di esempio
+X, _ = make_blobs(n_samples=150, centers=3, cluster_std=1.0, random_state=42)
 
-data = np.vstack((group1, group2, group3))
+# Applichiamo k-Means
+kmeans = KMeans(n_clusters=3, random_state=42)
+labels = kmeans.fit_predict(X)
 
-# Visualizziamo i punti (senza clustering)
-plt.figure(figsize=(6, 6))
-plt.scatter(data[:, 0], data[:, 1], c='gray')
-plt.title("Clienti (senza etichette)")
-plt.xlabel("Spesa totale")
-plt.ylabel("Numero ordini")
-plt.grid(True)
-plt.show()
+# Calcolo dei silhouette score
+silhouette_avg = silhouette_score(X, labels)
+sample_silhouette_values = silhouette_samples(X, labels)
 
-from sklearn.cluster import KMeans
+# Preparo i dati ordinati per cluster e silhouette
+sorted_labels = np.argsort(labels)
+sorted_scores = sample_silhouette_values[sorted_labels]
+sorted_clusters = labels[sorted_labels]
 
-# Applichiamo k-Means ai dati generati
-kmeans = KMeans(n_clusters=3, random_state=0)
-labels = kmeans.fit_predict(data)
+# Colori assegnati ai cluster per chiarezza
+cluster_colors = {0: "#1f77b4", 1: "#ff7f0e", 2: "#2ca02c"}
+bar_colors = [cluster_colors[c] for c in sorted_clusters]
 
-# Visualizzazione con i cluster trovati
-plt.figure(figsize=(6, 6))
-plt.scatter(data[:, 0], data[:, 1], c=labels, cmap='viridis')
-plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], 
-            c='red', marker='X', s=200, label='Centroidi')
-plt.title("Cluster trovati con k-Means")
-plt.xlabel("Spesa totale")
-plt.ylabel("Numero ordini")
+# Grafico semplificato e molto leggibile
+plt.figure(figsize=(12, 4))
+plt.bar(range(len(X)), sorted_scores, color=bar_colors, edgecolor='black')
+plt.axhline(silhouette_avg, color='red', linestyle='--', linewidth=2, label=f'Media silhouette = {silhouette_avg:.2f}')
+plt.title("Silhouette Score per ogni punto (colorato per cluster)", fontsize=14)
+plt.xlabel("Punti ordinati per cluster", fontsize=12)
+plt.ylabel("Silhouette Score", fontsize=12)
+plt.xticks([])
 plt.legend()
-plt.grid(True)
+plt.tight_layout()
 plt.show()
+
