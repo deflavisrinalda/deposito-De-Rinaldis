@@ -27,3 +27,6 @@ plt.ylabel('Spending Score (1-100)')
 plt.title('Clustering dei clienti')
 plt.show()
 
+# Identificare cluster ad alto potenziale
+centroids = pd.DataFrame(kmeans.cluster_centers_, columns=['Income_centroid', 'Score_centroid'])
+print(centroids)
