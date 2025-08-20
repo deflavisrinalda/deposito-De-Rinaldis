@@ -1,16 +1,16 @@
-import pandas as pd
-from sklearn.model_selection import train_test_split
+# import pandas as pd
+# from sklearn.model_selection import train_test_split
 
-df = pd.read_csv('../esercizi-19.08/esercizio1/DUQ_hourly.csv', parse_dates=['Datetime'])
+# df = pd.read_csv('../esercizi-19.08/esercizio1/DUQ_hourly.csv', parse_dates=['Datetime'])
 
-print(df.columns)
+# print(df.columns)
 
-# Etichetta: 1 se consumo > mediana, altrimenti 0
-df["target"] = (df["DUQ_MW"] > df["DUQ_MW"].median()).astype(int)
+# # Etichetta: 1 se consumo > mediana, altrimenti 0
+# df["target"] = (df["DUQ_MW"] > df["DUQ_MW"].median()).astype(int)
 
-df["hour"] = df["Datetime"].dt.hour
-df["dayofweek"] = df["Datetime"].dt.dayofweek
-df["month"] = df["Datetime"].dt.month
+# df["hour"] = df["Datetime"].dt.hour
+# df["dayofweek"] = df["Datetime"].dt.dayofweek
+# df["month"] = df["Datetime"].dt.month
 
 # # Feature: ora, giorno della settimana, mese
 # X = df[["hour", "dayofweek", "month"]]
@@ -50,6 +50,26 @@ df["month"] = df["Datetime"].dt.month
 
 # print(f"Decision Tree AUC: {auc_tree.mean():.3f} ± {auc_tree.std():.3f}")
 # print(f"Neural Network AUC: {auc_mlp.mean():.3f} ± {auc_mlp.std():.3f}")
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Generiamo 3 gruppi di punti (cluster)
+np.random.seed(42)
+group1 = np.random.normal(loc=[2, 2], scale=0.5, size=(50, 2))
+group2 = np.random.normal(loc=[6, 6], scale=0.5, size=(50, 2))
+group3 = np.random.normal(loc=[2, 6], scale=0.5, size=(50, 2))
+
+data = np.vstack((group1, group2, group3))
+
+# Visualizziamo i punti (senza clustering)
+plt.figure(figsize=(6, 6))
+plt.scatter(data[:, 0], data[:, 1], c='gray')
+plt.title("Clienti (senza etichette)")
+plt.xlabel("Spesa totale")
+plt.ylabel("Numero ordini")
+plt.grid(True)
+plt.show()
 
 from sklearn.cluster import KMeans
 
