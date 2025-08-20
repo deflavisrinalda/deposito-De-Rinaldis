@@ -127,53 +127,109 @@
 # plt.tight_layout()
 # plt.show()
 
-import pandas as pd
+# import pandas as pd
+# import numpy as np
+# from sklearn.preprocessing import StandardScaler
+# from sklearn.cluster import KMeans
+# from sklearn.metrics import silhouette_score
+# import matplotlib.pyplot as plt
+# import seaborn as sns
+
+# # Simuliamo un dataset Olist semplificato per l'esercizio
+# np.random.seed(42)
+# n_customers = 500
+
+# olist_df = pd.DataFrame({
+#     'customer_id': [f"C{i}" for i in range(n_customers)],
+#     'recency_days': np.random.exponential(scale=90, size=n_customers),  # giorni dall’ultimo ordine
+#     'frequency_orders': np.random.poisson(lam=3, size=n_customers),      # numero ordini
+#     'monetary_total': np.random.gamma(shape=2, scale=150, size=n_customers),  # spesa totale
+#     'avg_review_score': np.clip(np.random.normal(loc=4, scale=0.5, size=n_customers), 1, 5)  # recensioni
+# })
+
+# # Rimuoviamo clienti con 0 ordini (eventuali errori)
+# olist_df = olist_df[olist_df['frequency_orders'] > 0]
+
+# # Selezioniamo le feature per il clustering
+# features = ['recency_days', 'frequency_orders', 'monetary_total', 'avg_review_score']
+# X = olist_df[features]
+
+# # Standardizziamo
+# scaler = StandardScaler()
+# X_scaled = scaler.fit_transform(X)
+
+# # Proviamo diversi k e salviamo silhouette score
+# silhouette_scores = []
+# K = range(2, 7)
+
+# for k in K:
+#     kmeans = KMeans(n_clusters=k, random_state=42)
+#     labels = kmeans.fit_predict(X_scaled)
+#     score = silhouette_score(X_scaled, labels)
+#     silhouette_scores.append(score)
+
+# # Grafico silhouette score per diversi k
+# plt.figure(figsize=(8, 5))
+# sns.lineplot(x=list(K), y=silhouette_scores, marker='o')
+# plt.title("Silhouette Score al variare di k")
+# plt.xlabel("Numero di cluster (k)")
+# plt.ylabel("Silhouette Score")
+# plt.grid(True)
+# plt.tight_layout()
+# plt.show()
+
 import numpy as np
-from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_score
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.datasets import make_moons
+from sklearn.cluster import KMeans, DBSCAN
 
-# Simuliamo un dataset Olist semplificato per l'esercizio
-np.random.seed(42)
-n_customers = 500
+# Generazione di dati a forma non circolare (mezzalune) + aggiunta outlier
+from sklearn.datasets import make_moons
 
-olist_df = pd.DataFrame({
-    'customer_id': [f"C{i}" for i in range(n_customers)],
-    'recency_days': np.random.exponential(scale=90, size=n_customers),  # giorni dall’ultimo ordine
-    'frequency_orders': np.random.poisson(lam=3, size=n_customers),      # numero ordini
-    'monetary_total': np.random.gamma(shape=2, scale=150, size=n_customers),  # spesa totale
-    'avg_review_score': np.clip(np.random.normal(loc=4, scale=0.5, size=n_customers), 1, 5)  # recensioni
-})
+# Dati principali
+X_base, _ = make_moons(n_samples=280, noise=0.1, random_state=42)
 
-# Rimuoviamo clienti con 0 ordini (eventuali errori)
-olist_df = olist_df[olist_df['frequency_orders'] > 0]
+# Outlier casuali distribuiti nello spazio
+outliers = np.random.uniform(low=-1.5, high=2.5, size=(20, 2))
 
-# Selezioniamo le feature per il clustering
-features = ['recency_days', 'frequency_orders', 'monetary_total', 'avg_review_score']
-X = olist_df[features]
+# Concatenazione
+X_with_outliers = np.vstack((X_base, outliers))
 
-# Standardizziamo
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
+# k-Means clustering (forzato in 2 gruppi)
+kmeans = KMeans(n_clusters=2, random_state=42)
+kmeans_labels = kmeans.fit_predict(X_with_outliers)
 
-# Proviamo diversi k e salviamo silhouette score
-silhouette_scores = []
-K = range(2, 7)
+# DBSCAN clustering (basato sulla densità, senza specificare k)
+dbscan = DBSCAN(eps=0.2, min_samples=5)
+dbscan_labels = dbscan.fit_predict(X_with_outliers)
 
-for k in K:
-    kmeans = KMeans(n_clusters=k, random_state=42)
-    labels = kmeans.fit_predict(X_scaled)
-    score = silhouette_score(X_scaled, labels)
-    silhouette_scores.append(score)
+# Assegna colori ai cluster DBSCAN (grigio per outlier, colori per cluster)
+unique_labels = set(dbscan_labels)
+palette = sns.color_palette("Set2", len(unique_labels))
+color_map = {
+    label: palette[i] if label != -1 else (0.6, 0.6, 0.6)  # grigio per outlier
+    for i, label in enumerate(sorted(unique_labels))
+}
+colors_dbscan = [color_map[label] for label in dbscan_labels]
 
-# Grafico silhouette score per diversi k
-plt.figure(figsize=(8, 5))
-sns.lineplot(x=list(K), y=silhouette_scores, marker='o')
-plt.title("Silhouette Score al variare di k")
-plt.xlabel("Numero di cluster (k)")
-plt.ylabel("Silhouette Score")
-plt.grid(True)
+# Visualizzazione: k-Means vs DBSCAN
+fig, axs = plt.subplots(1, 2, figsize=(12, 5))
+
+# k-Means
+axs[0].scatter(X_with_outliers[:, 0], X_with_outliers[:, 1], c=kmeans_labels, cmap='Set1', s=40, edgecolor='black')
+axs[0].set_title("k-Means: forza tutti i punti in 2 cluster")
+axs[0].set_xlabel("Feature 1")
+axs[0].set_ylabel("Feature 2")
+axs[0].grid(True)
+
+# DBSCAN
+axs[1].scatter(X_with_outliers[:, 0], X_with_outliers[:, 1], c=colors_dbscan, s=40, edgecolor='black')
+axs[1].set_title("DBSCAN: forma naturale + outlier (grigio)")
+axs[1].set_xlabel("Feature 1")
+axs[1].set_ylabel("Feature 2")
+axs[1].grid(True)
+
 plt.tight_layout()
 plt.show()
+
