@@ -4,20 +4,49 @@ from openai import AzureOpenAI
 from tenacity import retry, wait_exponential, stop_after_attempt
  
 load_dotenv()
- 
-AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")
-AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
+
+# deploment e version presi dal .env mentre key e endpoint da far inserire all'utente
 AZURE_OPENAI_DEPLOYMENT = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 AZURE_API_VERSION = os.getenv("AZURE_API_VERSION")
+AZURE_OPENAI_KEY = None
+AZURE_OPENAI_ENDPOINT = None
+client = None
 
+def get_client(endpoint: str, api_key: str):
 
-client = AzureOpenAI(
+    AZURE_OPENAI_KEY = api_key
+    AZURE_OPENAI_ENDPOINT = endpoint
+
+    client = AzureOpenAI(
     api_version=AZURE_API_VERSION,
     azure_endpoint=AZURE_OPENAI_ENDPOINT,
     api_key=AZURE_OPENAI_KEY,
-)
+    )
 
-def ask_openai(user_text: str) -> str:
+    return client
+
+def validate_key_endpoint(key: str, endpoint: str) -> bool:
+
+    try:
+        client = get_client(endpoint, key)
+        return True
+    except Exception as e:
+        print(f"Error validating key and endpoint: {e}")
+        return False
+
+# AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")
+# AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
+# AZURE_OPENAI_DEPLOYMENT = os.getenv("AZURE_OPENAI_DEPLOYMENT")
+# AZURE_API_VERSION = os.getenv("AZURE_API_VERSION")
+
+
+# client = AzureOpenAI(
+#     api_version=AZURE_API_VERSION,
+#     azure_endpoint=AZURE_OPENAI_ENDPOINT,
+#     api_key=AZURE_OPENAI_KEY,
+# )
+
+def ask_openai(user_text: str, client) -> str:
     response = client.chat.completions.create(
         messages=[
             {

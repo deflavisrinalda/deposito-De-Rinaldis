@@ -1,6 +1,8 @@
 import streamlit as st
 from llm import ask_openai
 
+client = st.session_state.client
+
 st.title("Chat")
 
 # #Domanda-risposta con l'LLM
@@ -8,25 +10,6 @@ st.title("Chat")
 #     response = ask_openai(user_input)
 #     st.text_area("LLM:", value=response, height=300)
 
-# PRIMA SOLUZIONE FUNZIONANTE
-# user_input = st.text_input("Cosa vuoi chiedere all'LLM?: ")
-
-# # Inizializzo la chat
-# if "messages" not in st.session_state:
-#     st.session_state.messages = []
-
-# # Mostro la cronologia dei messaggi
-# for msg in st.session_state.messages:
-#     st.write(msg)
-
-# # Gestisco l'input dell'utente
-# if user_input and st.button("Send"):
-#     response = ask_openai(user_input)
-#     st.session_state.messages.append(f"You: {user_input}")
-#     st.session_state.messages.append(f"LLM: {response}")
-#     st.rerun()
-
-#SECONDA SOLUZIONE
 # Inizializzo la chat
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -42,7 +25,7 @@ if prompt := st.chat_input("Scrivi un messaggio..."):
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    response = ask_openai(prompt)
+    response = ask_openai(prompt, client)
 
     # Mostra la risposta e la salva
     st.session_state.messages.append({"role": "assistant", "content": response})
